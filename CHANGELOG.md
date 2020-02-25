@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+### Forked
+- Applied https://github.com/DerrickWood/kraken2/pull/220
 
 ### Added
 - Expose --load-factor setting to kraken2-build
