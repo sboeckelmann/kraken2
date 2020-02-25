@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019, Derrick Wood <dwood@cs.jhu.edu>
+ * Copyright 2013-2020, Derrick Wood <dwood@cs.jhu.edu>
  *
  * This file is part of the Kraken 2 taxonomic sequence classification system.
  */
@@ -318,7 +318,8 @@ void ProcessFiles(const char *filename1, const char *filename2,
             taxa, hit_counts, translated_frames, curr_taxon_counts);
         if (call) {
           char buffer[1024] = "";
-          sprintf(buffer, " kraken:taxid|%lu", tax.nodes()[call].external_id);
+          sprintf(buffer, " kraken:taxid|%llu",
+			  (unsigned long long) tax.nodes()[call].external_id);
           seq1.header += buffer;
           seq2.header += buffer;
           c1_oss << seq1.to_string();
@@ -549,7 +550,7 @@ taxid_t ClassifySequence(Sequence &dna, Sequence &dna2, ostringstream &koss,
             taxon = last_taxon;
           }
           if (taxon) {
-            if (opts.quick_mode) {
+            if (opts.quick_mode && minimizer_hit_groups >= opts.minimum_hit_groups) {
               call = taxon;
               goto finished_searching;  // need to break 3 loops here
             }
@@ -574,8 +575,7 @@ taxid_t ClassifySequence(Sequence &dna, Sequence &dna2, ostringstream &koss,
     total_kmers--;  // account for the mate pair marker
   if (opts.use_translated_search)  // account for reading frame markers
     total_kmers -= opts.paired_end_processing ? 4 : 2;
-  if (! opts.quick_mode)
-    call = ResolveTree(hit_counts, taxonomy, total_kmers, opts);
+  call = ResolveTree(hit_counts, taxonomy, total_kmers, opts);
   // Void a call made by too few minimizer groups
   if (call && minimizer_hit_groups < opts.minimum_hit_groups)
     call = 0;
